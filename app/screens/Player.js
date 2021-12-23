@@ -1,10 +1,14 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Dimensions, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Dimensions, Text, ActivityIndicator, Modal, TouchableWithoutFeedback } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av'
+import { SvgXml } from "react-native-svg";
+
 
 import { AppScreen, AppHeader } from '../components/'
 import AppContext from '../context/AppContext';
+import { Done } from '../constants/'
+
 
 const { width, height } = Dimensions.get('screen')
 
@@ -13,10 +17,14 @@ export default function Player({ navigation, route }) {
     const [activeSpeaker, setActiveSpeaker] = useState('interviewer');
     const [loading, setLoading] = useState(true);
     const [track, setTrack] = useState(new Audio.Sound());
-    const [currentTrackId, setCurrentTrackId] = useState(0);
+    const [recording, setRecording] = useState();
+    const [currentTrackId, setCurrentTrackId] = useState(20);
     const [trackDuration, setTrackDuration] = useState();
     const [answerTime, setAnswerTime] = useState(route.params.duration);
-    const [ended, setEnded] = useState(false)
+    const [ended, setEnded] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [uri, setUri] = useState('')
+
 
 
     const loadAsync = async () => {
@@ -36,6 +44,30 @@ export default function Player({ navigation, route }) {
                 }
             )
         }
+    }
+
+    async function startRecording() {
+        try {
+            await Audio.requestPermissionsAsync();
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: true,
+                playsInSilentModeIOS: true,
+            });
+            const { recording } = await Audio.Recording.createAsync(
+                Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+            );
+            setRecording(recording);
+        } catch (err) {
+            console.error('Failed to start recording', err);
+        }
+    }
+
+    async function stopRecording() {
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        setUri(uri);
+        setRecording(null);
+        setShowModal(true);
     }
 
     useEffect(
@@ -103,13 +135,23 @@ export default function Player({ navigation, route }) {
     )
 
 
+    useEffect(() => {
+        startRecording()
+    }, [])
 
 
     useEffect(() => {
         if (ended) {
-            navigation.goBack();
+            stopRecording()
         }
     }, [ended])
+
+
+
+    const doneHandler = () => {
+        setShowModal(!showModal);
+        navigation.navigate('PlayRecording', { uri: uri })
+    }
 
 
 
@@ -144,6 +186,28 @@ export default function Player({ navigation, route }) {
                         <ActivityIndicator size='large' color='white' />
                     </View>
                 }
+                {showModal && <View style={{ width, height, backgroundColor: 'rgba(0,0,0,0.5)', position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />}
+                <Modal
+                    animationType='slide'
+                    transparent={true}
+                    visible={showModal}
+                    onRequestClose={() => {
+                        setShowModal(!showModal);
+                    }}
+                >
+                    <View style={styles.modal}>
+                        <SvgXml xml={Done} width='50%' height='30%' />
+                        <View style={{ width: '100%', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 22, color: 'black', marginVertical: 10, fontWeight: 'bold' }}>All Done!</Text>
+                            <Text style={{ color: 'rgba(0,0,0,0.6)', fontSize: 15, maxWidth: width - 70, textAlign: 'center' }}>Your interview is over, let's check out answers!</Text>
+                        </View>
+                        <TouchableWithoutFeedback onPress={doneHandler}>
+                            <View style={{ width: width - 40, alignSelf: 'center', height: 50, backgroundColor: 'black', alignItems: 'center', justifyContent: 'center', borderRadius: 20, marginBottom: 20 }}>
+                                <Text style={{ color: 'rgba(255,255,255,1)', fontSize: 17 }}>Play Recording</Text>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </Modal>
             </View>
         </AppScreen>
 
@@ -185,4 +249,25 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    modal: {
+        width: width,
+        height: height / 1.5,
+        backgroundColor: 'white',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        position: 'absolute',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        top: height - height / 1.5,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        paddingVertical: 15,
+        paddingBottom: 30
+    }
 });

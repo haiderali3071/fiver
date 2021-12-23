@@ -4,4 +4,6 @@ import AppRadio from "./AppRadio";
 import AppHeader from "./AppHeader";
 import AppDonut from "./AppDonut";
 import AppLoading from "./AppLoading";
-export { AppScreen, AppButton, AppRadio, AppHeader, AppDonut, AppLoading };
+import AppIconButton from "./AppIconButton";
+import AppPlayerAnimation from "./AppPlayerAnimation";
+export { AppScreen, AppButton, AppRadio, AppHeader, AppDonut, AppLoading, AppIconButton, AppPlayerAnimation };

@@ -1,8 +1,13 @@
-import React from 'react';
-import { Dimensions } from 'react-native';
+import React, { useContext } from 'react';
+import { Dimensions, View } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AppContext from '../context/AppContext';
+import { removeData } from '../cache/UserStorage'
+import { AppLoading } from '../components/';
+
+
 
 const { height, width } = Dimensions.get('screen');
 
@@ -13,6 +18,24 @@ import { Language, Gender, Mode, Help, Share, AboutUs } from '../screens/'
 const Drawer = createDrawerNavigator();
 
 export default function AppDrawer() {
+    const { appContext, setAppContext } = useContext(AppContext);
+    const Logout = () => {
+        removeData();
+        setAppContext({
+            isLaunched: false,
+            language: '',
+            gender: '',
+            mode: '',
+            activeModeTitle: ''
+        })
+        return (
+            <View style={{ width, height, justifyContent: 'center', alignItems: 'center', }}>
+                <View style={{ width: 50, height: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black', borderRadius: 25 }}>
+                    <AppLoading visible={true} />
+                </View>
+            </View>
+        )
+    }
     return (
         <Drawer.Navigator initialRouteName="Home"
             screenOptions={({ route }) => ({
@@ -71,6 +94,11 @@ export default function AppDrawer() {
                             ? 'share'
                             : 'share';
                     }
+                    else if (route.name === 'Log out') {
+                        iconName = focused
+                            ? 'logout'
+                            : 'logout';
+                    }
 
                     // You can return any component that you like here!
                     return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
@@ -84,6 +112,7 @@ export default function AppDrawer() {
             <Drawer.Screen name="Help" component={Help} />
             <Drawer.Screen name="Share" component={Share} />
             <Drawer.Screen name="About Us" component={AboutUs} />
+            <Drawer.Screen name="Log out" component={Logout} />
         </Drawer.Navigator>
     );
 }
