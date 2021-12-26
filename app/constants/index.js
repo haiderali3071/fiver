@@ -6,4 +6,5 @@ import Random from './Random';
 import Dvd from './Dvd';
 import Done from './Done';
 import Player from './Player';
-export { Logo, Interview, Ready, Playlist, Random, Dvd, Done, Player };
+import Empty from './Empty';
+export { Logo, Interview, Ready, Playlist, Random, Dvd, Done, Player, Empty };

@@ -4,9 +4,9 @@ import { SvgXml } from 'react-native-svg'
 import firebase from '../config/firebase'
 import { getFirestore, doc, onSnapshot } from 'firebase/firestore';
 
-import { AppHeader } from '../components/';
+import { AppHeader, AppLoading, AppButton } from '../components/';
 import AppContext from '../context/AppContext';
-import { Dvd } from '../constants/'
+import { Dvd, Empty } from '../constants/'
 import { getData } from '../cache/UserStorage';
 
 const { height, width } = Dimensions.get('screen');
@@ -14,19 +14,34 @@ const { height, width } = Dimensions.get('screen');
 export default function Recordings({ navigation }) {
     const [recordings, setRecordings] = useState([]);
     const db = getFirestore(firebase);
+    const [loading, setLoading] = useState(false);
 
     useEffect(async () => {
+        setLoading(true)
         const id = await getData();
         const docRef = doc(db, "devices", id);
         onSnapshot(
             docRef,
             (doc) => {
                 setRecordings(doc.data().recordings);
+                setLoading(false)
             });
+        setLoading(false)
     }, [])
 
+
+    if (loading) {
+        return (
+            <View style={{ width, height: height - 100, justifyContent: 'center', alignItems: 'center', }}>
+                <View style={{ width: 60, height: 60, borderRadius: 30 }}>
+                    <AppLoading visible={true} />
+                </View>
+            </View>
+        );
+    }
+
     return (
-        <ScrollView stickyHeaderIndices={[0]} style={styles.container}>
+        recordings.length > 0 ? <ScrollView stickyHeaderIndices={[0]} style={styles.container}>
             <AppHeader title='Recordings' onPress={() => navigation.openDrawer()} />
             {
                 recordings.map(({ name, uri }, i) => (
@@ -40,7 +55,15 @@ export default function Recordings({ navigation }) {
                     </TouchableWithoutFeedback>
                 ))
             }
-        </ScrollView>
+        </ScrollView> :
+            <View style={styles.container}>
+                <AppHeader title='Recordings' onPress={() => navigation.openDrawer()} />
+                <View style={{ height: height - 230, width, justifyContent: 'center', alignItems: 'center' }}>
+                    <SvgXml xml={Empty} width={100} height={140} />
+                    <Text style={{ fontSize: 18, marginVertical: 30 }}>No interviews found</Text>
+                    <AppButton title='Record an Interview' disabled={false} onPress={() => navigation.navigate('InterviewScreen')} />
+                </View>
+            </View>
     );
 }
 
