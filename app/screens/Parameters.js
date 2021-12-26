@@ -13,14 +13,15 @@ export default function Parameters({ navigation }) {
     const [duration, setDuration] = useState(0);
     const [currentId, setCurrentId] = useState(0);
     const { appContext, setAppContext } = useContext(AppContext);
-    const duartionHandler = () => {
+    const duartionHandler = async() => {
         var mode = appContext.mode;
         mode[currentId].duration = duration;
-        setAppContext(
+        await setAppContext(
             {
                 ...appContext, mode: mode
             }
         )
+       
         if (currentId < mode.length - 1) {
             setCurrentId(currentId + 1);
             setDuration(0);

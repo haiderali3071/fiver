@@ -1,31 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView, Image } from 'react-native';
+import { SvgXml } from 'react-native-svg';
+
 import { AppHeader } from '../components';
+import { Help1, Help2, Help3, Help4, Help5, Help6, Help7 } from '../constants/';
 
 const { width, height } = Dimensions.get('screen');
-import PDFReader from 'rn-pdf-reader-js'
 
 
 export default function Help({ navigation }) {
     return (
-        <View style={styles.container}>
+        <ScrollView stickyHeaderIndices={[0]} style={styles.container} contentContainerStyle={{ alignItems: 'center' }}>
             <AppHeader title='Help' onPress={() => navigation.openDrawer()} />
-            <PDFReader
-                source={{ uri: 'https://drive.google.com/file/d/1o2E3N14KN-fPoaIVRsLYaYsYYuvIe-7p/view?usp=sharing' }}
-                style={styles.pdf} />
-                
-        </View>
+            <SvgXml xml={Help1} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
+            <SvgXml xml={Help2} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
+            <SvgXml xml={Help3} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
+            <SvgXml xml={Help4} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
+            <SvgXml xml={Help5} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
+            <SvgXml xml={Help6} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
+            <SvgXml xml={Help7} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
+
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         width,
-        height,
-        backgroundColor: 'white'
+        height: '100%',
+        flex: 1,
+        backgroundColor: 'white',
     },
-    pdf: {
-        flex: 1
-    }
 });

@@ -24,7 +24,7 @@ export default function Player({ navigation }) {
     const [recording, setRecording] = useState();
     const [currentTrackId, setCurrentTrackId] = useState(0);
     const [trackDuration, setTrackDuration] = useState();
-    const [answerTime, setAnswerTime] = useState(5);
+    const [answerTime, setAnswerTime] = useState(appContext.mode[currentTrackId].duration);
     const [ended, setEnded] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [uri, setUri] = useState('')
@@ -170,7 +170,12 @@ export default function Player({ navigation }) {
             const docRef = doc(db, "devices", id);
             await updateDoc(docRef, { recordings: arrayUnion(source) });
             setLoading(false)
-            navigation.navigate('Recordings')
+            navigation.reset({
+                index: 0,
+                routes: [{
+                    name: 'Recordings'
+                }],
+            });
 
         }
     }
