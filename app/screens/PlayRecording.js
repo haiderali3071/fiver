@@ -1,18 +1,22 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { StyleSheet, View, Dimensions, Text, ActivityIndicator } from 'react-native';
 import { AppHeader, AppIconButton, AppPlayerAnimation } from '../components/'
 import AppContext from '../context/AppContext';
+
+import { SvgXml } from "react-native-svg";
+import { Player } from '../constants/'
+
 
 import { Audio } from 'expo-av'
 
 const { height, width } = Dimensions.get('screen');
 
 export default function PlayeRecording({ navigation, route }) {
-    const {uri } = route.params;
+    const { uri } = route.params;
     const [play, setPlay] = useState(false)
     const [track, setTrack] = useState(new Audio.Sound());
     const [loading, setLoading] = useState(true);
-
+    const [trackDuration, setTrackDuration] = useState();
 
 
     const loadAsync = async () => {
@@ -22,6 +26,8 @@ export default function PlayeRecording({ navigation, route }) {
                 shouldPlay: false,
             }).then(
                 async () => {
+                    const durationProm = await track.getStatusAsync();
+                    setTrackDuration(() => durationProm.durationMillis);
                     setLoading(false);
                 }
             ).catch(
@@ -33,13 +39,48 @@ export default function PlayeRecording({ navigation, route }) {
     }
 
 
+
+
     useEffect(
         () => {
-            if (!track._loaded) {
-                loadAsync();
-            }
+            loadAsync();
         }, []
     )
+
+    const unloadAsync = async () => {
+        if (track._loaded) {
+            track.stopAsync();
+            track.unloadAsync();
+        }
+    }
+
+
+
+    const getStatus = useCallback(
+        async () => {
+            const status = await track.getStatusAsync();
+            if (trackDuration === status.positionMillis) {
+                unloadAsync();
+                setPlay(false)
+                navigation.goBack();
+            }
+        }
+    )
+
+    useEffect(
+        () => {
+            if (trackDuration) {
+                const timer = setInterval(
+                    () => {
+                        getStatus();
+                    }, 1000
+                )
+                return () => clearInterval(timer);
+            }
+
+        }, [trackDuration]
+    )
+
 
 
     const playHandler = async () => {
@@ -68,7 +109,7 @@ export default function PlayeRecording({ navigation, route }) {
             <AppHeader title='Question Player' onPress={() => navigation.openDrawer()} />
             <View style={{ width: '100%', height: height - 150, justifyContent: 'space-evenly', alignItems: 'center' }}>
                 <View style={styles.playerImg}>
-                    <AppPlayerAnimation visible={true} />
+                    <SvgXml xml={Player} width='80%' height='60%' />
                 </View>
                 <Text style={styles.player}>Answers</Text>
                 <View style={styles.controlsWrapper}>

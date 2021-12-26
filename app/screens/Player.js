@@ -3,24 +3,28 @@ import { StyleSheet, View, Dimensions, Text, ActivityIndicator, Modal, Touchable
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av'
 import { SvgXml } from "react-native-svg";
+import firebase from '../config/firebase';
+import { getFirestore, doc, updateDoc, arrayUnion, } from 'firebase/firestore/lite'
 
 
-import { AppScreen, AppHeader } from '../components/'
+
+import { AppScreen, AppHeader, AppDonut } from '../components/'
 import AppContext from '../context/AppContext';
 import { Done } from '../constants/'
+import { getData } from '../cache/UserStorage';
 
 
 const { width, height } = Dimensions.get('screen')
 
-export default function Player({ navigation, route }) {
+export default function Player({ navigation }) {
     const { appContext } = useContext(AppContext);
     const [activeSpeaker, setActiveSpeaker] = useState('interviewer');
     const [loading, setLoading] = useState(true);
     const [track, setTrack] = useState(new Audio.Sound());
     const [recording, setRecording] = useState();
-    const [currentTrackId, setCurrentTrackId] = useState(20);
+    const [currentTrackId, setCurrentTrackId] = useState(0);
     const [trackDuration, setTrackDuration] = useState();
-    const [answerTime, setAnswerTime] = useState(route.params.duration);
+    const [answerTime, setAnswerTime] = useState(5);
     const [ended, setEnded] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [uri, setUri] = useState('')
@@ -63,10 +67,10 @@ export default function Player({ navigation, route }) {
     }
 
     async function stopRecording() {
-        await recording.stopAndUnloadAsync();
         const uri = recording.getURI();
+        await recording.stopAndUnloadAsync();
         setUri(uri);
-        setRecording(null);
+        await setRecording(null);
         setShowModal(true);
     }
 
@@ -102,8 +106,8 @@ export default function Player({ navigation, route }) {
             }
             else {
                 setActiveSpeaker('interviewer');
-                setAnswerTime(route.params.duration);
                 if (appContext.mode.length - 1 !== currentTrackId) {
+                    setAnswerTime(appContext.mode[currentTrackId + 1].duration)
                     setCurrentTrackId(currentTrackId + 1)
                 }
                 else {
@@ -150,9 +154,26 @@ export default function Player({ navigation, route }) {
 
     const doneHandler = () => {
         setShowModal(!showModal);
-        navigation.navigate('PlayRecording', { uri: uri })
+        pushRecording(uri)
     }
 
+
+    const pushRecording = async () => {
+        if (uri) {
+            const db = getFirestore(firebase);
+            setLoading(true)
+            const source = {
+                uri: uri,
+                name: new Date()
+            }
+            const id = await getData();
+            const docRef = doc(db, "devices", id);
+            await updateDoc(docRef, { recordings: arrayUnion(source) });
+            setLoading(false)
+            navigation.navigate('Recordings')
+
+        }
+    }
 
 
 
@@ -161,9 +182,9 @@ export default function Player({ navigation, route }) {
             <View style={styles.container}>
                 <AppHeader title='Interview' />
                 <View style={styles.wrap}>
-                    <View style={{ flexDirection: 'row', height: 40, width: '100%', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', width: width - 60, alignItems: 'center' }}>
                         <Text style={{ color: 'rgba(0,0,0,0.8)', fontSize: 17 }}>Question:</Text>
-                        <Text style={{ color: 'black', marginLeft: 10, fontSize: 17 }}>{appContext.mode[currentTrackId].title}</Text>
+                        <Text style={{ color: 'black', marginHorizontal: 10, fontSize: 17, maxWidth: '65%' }}>{appContext.mode[currentTrackId].title}</Text>
                     </View>
                     <View style={[styles.callerCard, { backgroundColor: activeSpeaker === 'interviewer' ? 'black' : 'rgba(0,0,0,0.1)' }]}>
                         <Text style={{ color: activeSpeaker === 'interviewer' ? 'white' : 'black', position: 'absolute', left: 20, top: 20 }}>{activeSpeaker === 'interviewer' ? 'Speaking...' : 'Listening...'}</Text>
@@ -208,6 +229,7 @@ export default function Player({ navigation, route }) {
                         </TouchableWithoutFeedback>
                     </View>
                 </Modal>
+
             </View>
         </AppScreen>
 
@@ -219,15 +241,15 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     wrap: {
-        height: height - 140,
+        height: height - 230,
         justifyContent: 'space-evenly',
         alignItems: 'center',
         paddingHorizontal: 30,
-        width: '100%'
+        width: '100%',
     },
     callerCard: {
         alignSelf: 'center',
-        height: '35%',
+        height: '32%',
         backgroundColor: 'rgba(0,0,0,0.1)',
         width: '100%',
         borderRadius: 10,

@@ -10,16 +10,17 @@ import Colors from '../config/colors';
 
 
 const { width, height } = Dimensions.get('screen');
+const windowHeight = Dimensions.get('window').height;
+const navbarHeight = height - windowHeight
 
 export default function Interview({ navigation }) {
     const { appContext } = useContext(AppContext);
-    const [duration, setDuration] = useState(5);
     const [showModal, setShowModal] = useState(false);
 
 
     const readyHandler = () => {
         setShowModal(!showModal);
-        navigation.navigate('Player', { duration: duration })
+        navigation.navigate('Parameters')
     }
 
     return (
@@ -27,20 +28,6 @@ export default function Interview({ navigation }) {
             <View style={styles.container}>
                 <AppHeader title='Start Interview' onPress={() => navigation.openDrawer()} />
                 <View style={styles.wrap}>
-                    <View style={{ alignItems: 'center', position: 'relative', width: '100%' }}>
-                        <Text style={{ color: 'rgba(0,0,0,0.8)', fontSize: 17, alignSelf: 'flex-start', height: 20, }}>Answer Time:</Text>
-                        <Text style={{ position: 'absolute', alignSelf: 'center', top: 65, fontSize: 25, height: 20, }}>{duration}s</Text>
-                        <AppDonut percentage={(duration / 20) * 100} />
-                        <Slider
-                            style={{ width: '100%', marginTop: 10 }}
-                            minimumValue={5}
-                            maximumValue={20}
-                            minimumTrackTintColor="rgba(0,0,0,0.7)"
-                            maximumTrackTintColor="grey"
-                            thumbTintColor='black'
-                            onValueChange={(duration) => setDuration(Math.round(duration, 1))}
-                        />
-                    </View>
                     <View style={{ flexDirection: 'row', height: 40, width: '100%', alignItems: 'center' }}>
                         <Text style={{ color: 'rgba(0,0,0,0.8)', fontSize: 17 }}>Language:</Text>
                         <Text style={{ color: 'black', marginLeft: 10, fontSize: 17 }}>{appContext.language}</Text>
@@ -55,7 +42,7 @@ export default function Interview({ navigation }) {
                     </View>
                     <View style={{ flexDirection: 'row', height: 40, width: '100%', alignItems: 'center' }}>
                         <Text style={{ color: 'rgba(0,0,0,0.8)', fontSize: 17 }}>Total Questions:</Text>
-                        <Text style={{ color: 'black', marginLeft: 10, fontSize: 17 }}>20</Text>
+                        <Text style={{ color: 'black', marginLeft: 10, fontSize: 17 }}>{appContext.mode.length}</Text>
                     </View>
                     <View style={{ width: '100%', height: 100 }}>
                         <TouchableWithoutFeedback onPress={() => setShowModal(!showModal)}>
@@ -63,7 +50,7 @@ export default function Interview({ navigation }) {
                                 <Text style={{ color: 'rgba(255,255,255,1)', fontSize: 17 }}>Start Interview</Text>
                             </View>
                         </TouchableWithoutFeedback>
-                        <TouchableWithoutFeedback onPress={() => navigation.navigate('QuestionsScreen')}>
+                        <TouchableWithoutFeedback onPress={() => navigation.navigate('Questions')}>
                             <View style={{ width: width - 40, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', height: 30 }}>
                                 <Text style={{ color: 'rgba(0,0,0,0.8)', fontSize: 17 }}>Play Questions</Text>
                             </View>
@@ -103,10 +90,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     wrap: {
-        height: height - 140,
+        height: height - 190,
         width: '100%',
         justifyContent: 'space-evenly',
-        paddingHorizontal: 20
+        paddingHorizontal: 20,
     },
     modal: {
         width: width,

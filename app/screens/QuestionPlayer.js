@@ -1,7 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, View, Dimensions, Text, ActivityIndicator } from 'react-native';
 import { AppHeader, AppIconButton, AppPlayerAnimation } from '../components/'
+import { SvgXml } from "react-native-svg";
+
 import AppContext from '../context/AppContext';
+import { Player } from '../constants/'
 
 import { Audio } from 'expo-av'
 
@@ -44,7 +47,7 @@ export default function QuestionPlayer({ navigation, route }) {
     )
 
     const previousHandler = async () => {
-        if (!loading && currentId < !0) {
+        if (!loading && currentId > !0) {
             await track.unloadAsync();
             setCurrentId((currentId) => currentId - 1)
         }
@@ -81,9 +84,9 @@ export default function QuestionPlayer({ navigation, route }) {
     return (
         <View style={styles.container}>
             <AppHeader title='Question Player' onPress={() => navigation.openDrawer()} />
-            <View style={{ width: '100%', height: height - 150, justifyContent: 'space-evenly', alignItems: 'center' }}>
+            <View style={{ width: '100%', height: height - 200, justifyContent: 'space-evenly', alignItems: 'center' }}>
                 <View style={styles.playerImg}>
-                    <AppPlayerAnimation visible={true} />
+                    <SvgXml xml={Player} width='80%' height='60%' />
                 </View>
                 <Text style={styles.player}>{appContext.mode[currentId].title}</Text>
                 <View style={styles.controlsWrapper}>

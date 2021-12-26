@@ -12,7 +12,9 @@ import Interview from "./Interview";
 import Player from "./Player";
 import PlayRecording from "./PlayRecording";
 import QuestionPlayer from "./QuestionPlayer";
+import Parameters from "./Parameters";
+import Recordings from "./Recordings";
 
 
 
-export { Welcome, Language, Gender, Mode, Help, Share, AboutUs, Questions, Interview, Player, PlayRecording, QuestionPlayer };
+export { Welcome, Language, Gender, Mode, Help, Share, AboutUs, Questions, Interview, Player, PlayRecording, QuestionPlayer, Parameters, Recordings };

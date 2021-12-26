@@ -5,7 +5,7 @@ import Colors from '../config/colors';
 export default function AppButton({ title, disabled, onPress }) {
     return (
         <TouchableWithoutFeedback disabled={disabled} onPress={onPress}>
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: disabled ? 'grey' : 'black' }]}>
                 <Text adjustsFontSizeToFit style={{ color: 'white', fontSize: 15 }}>{title}</Text>
             </View>
         </TouchableWithoutFeedback>

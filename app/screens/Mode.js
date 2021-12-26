@@ -3,9 +3,13 @@ import { StyleSheet, View, Dimensions, Text, Modal, TouchableWithoutFeedback, Sc
 import { SvgXml } from 'react-native-svg'
 import { Entypo } from '@expo/vector-icons';
 
+
+import firebase from '../config/firebase';
+import { getFirestore, doc, collection, updateDoc, addDoc } from 'firebase/firestore/lite'
+
 import Colors from '../config/colors'
 import { AppScreen, AppRadio, AppButton, AppLoading } from '../components/';
-import { setData } from '../cache/UserStorage'
+import { getData, removeData, setData } from '../cache/UserStorage'
 import { Logo, Dvd } from '../constants/';
 import AppContext from '../context/AppContext';
 
@@ -26,27 +30,28 @@ export default function Mode({ navigation }) {
 
     const isLaunchedHandler = async (appMode) => {
         setLoading(true)
-        fetch('https://thelingo.herokuapp.com/', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                appContext: {
-                    isLaunched: true,
-                    language: appContext.language,
-                    gender: appContext.gender,
-                    mode: appContext.mode,
-                    activeModeTitle: appContext.activeModeTitle
-                }
-            })
-        }).then((response) => response.json())
-            .then((json) => {
-                setData(JSON.stringify(json.token))
-                setAppContext({ isLaunched: true, language: appContext.language, gender: appContext.gender, mode: appContext.mode, activeModeTitle: appContext.activeModeTitle })
-                setLoading(false)
-            })
+        const db = getFirestore(firebase);
+        const appdData = {
+            isLaunched: true,
+            language: appContext.language,
+            gender: appContext.gender,
+            mode: appContext.mode,
+            activeModeTitle: appContext.activeModeTitle,
+            recordings: []
+        }
+        if (!appContext.isLaunched) {
+            const docRef = await addDoc(collection(db, "devices"), appdData)
+            setData(docRef.id);
+            setAppContext({ isLaunched: true, language: appContext.language, gender: appContext.gender, mode: appContext.mode, activeModeTitle: appContext.activeModeTitle })
+        }
+        else {
+            const id = await getData();
+            const docRef = doc(db, "devices", id);
+            await updateDoc(docRef, appdData)
+            setAppContext({ isLaunched: true, language: appContext.language, gender: appContext.gender, mode: appContext.mode, activeModeTitle: appContext.activeModeTitle })
+            navigation.navigate('Home')
+        }
+        setLoading(false)
 
     }
 
@@ -84,7 +89,7 @@ export default function Mode({ navigation }) {
                         <AppRadio title='Tailored' appContext={appContext.activeModeTitle} onPress={() => modeHandler('Tailored')} />
                     </View>
                     <View style={{ width: '100%', alignItems: 'center' }}>
-                        {!loading ? <AppButton title={appContext.isLaunched ? 'Ok' : 'Continue'} disabled={appContext.mode ? false : true} onPress={appContext.isLaunched ? () => navigation.navigate('Home') : () => isLaunchedHandler(appContext.activeModeTitle)} /> :
+                        {!loading ? <AppButton title={appContext.isLaunched ? 'Ok' : 'Continue'} disabled={appContext.mode ? false : true} onPress={() => isLaunchedHandler(appContext.activeModeTitle)} /> :
                             <View style={{ width: 50, height: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: 'black', borderRadius: 25 }}>
                                 <AppLoading visible={true} />
                             </View>}
