@@ -84,7 +84,7 @@ export default function QuestionPlayer({ navigation, route }) {
     return (
         <View style={styles.container}>
             <AppHeader title='Question Player' onPress={() => navigation.openDrawer()} />
-            <View style={{ width: '100%', height: height - 200, justifyContent: 'space-evenly', alignItems: 'center' }}>
+            <View style={{ width: '100%', height: height - 230, justifyContent: 'space-evenly', alignItems: 'center' }}>
                 <View style={styles.playerImg}>
                     <SvgXml xml={Player} width='80%' height='60%' />
                 </View>

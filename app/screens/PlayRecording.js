@@ -106,8 +106,8 @@ export default function PlayeRecording({ navigation, route }) {
 
     return (
         <View style={styles.container}>
-            <AppHeader title='Question Player' onPress={() => navigation.openDrawer()} />
-            <View style={{ width: '100%', height: height - 150, justifyContent: 'space-evenly', alignItems: 'center' }}>
+            <AppHeader title='Interview recordings' onPress={() => navigation.openDrawer()} />
+            <View style={{ width: '100%', height: height - 250, justifyContent: 'space-evenly', alignItems: 'center', backgroundColor:'green' }}>
                 <View style={styles.playerImg}>
                     <SvgXml xml={Player} width='80%' height='60%' />
                 </View>

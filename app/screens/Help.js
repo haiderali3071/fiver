@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Dimensions, ScrollView, Image } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView, Text } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { AppHeader } from '../components';
@@ -19,6 +19,10 @@ export default function Help({ navigation }) {
             <SvgXml xml={Help5} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
             <SvgXml xml={Help6} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
             <SvgXml xml={Help7} width={width - 40} height={height - 20} style={{ marginVertical: 10, }} />
+            <View style={{ marginBottom: 100, paddingHorizontal: 30, alignItems: 'flex-start', width }}>
+                <Text style={{ fontSize: 17 }}>Please email us on:</Text>
+                <Text style={{ textDecorationLine: 'underline', fontSize: 20 }}>ezic.thelingo@godwinsandcogroup.com</Text>
+            </View>
 
         </ScrollView>
     );
